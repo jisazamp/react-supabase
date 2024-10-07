@@ -46,7 +46,9 @@ const App = () => {
   // función para añadir un nuevo cliente
   const addClient = async () => {
     // espera a agregar la información que tenemos guardad en el estado en la BD
-    await supabase.from("clients").insert({ firstName, lastName, age });
+    await supabase
+      .from("clients")
+      .insert({ first_name: firstName, last_name: lastName, age });
   };
 
   // función que borra un cliente por id
@@ -111,8 +113,8 @@ const App = () => {
             {clients.map((client) => (
               <tr key={client.id}>
                 <th scope="row">{client.id}</th>
-                <td>{client.firstName}</td>
-                <td>{client.lastName}</td>
+                <td>{client.first_name}</td>
+                <td>{client.last_name}</td>
                 <td>{client.age}</td>
                 <td className="d-flex" style={{ gap: "10px" }}>
                   <button
