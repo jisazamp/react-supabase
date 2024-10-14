@@ -1,133 +1,120 @@
-import { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
-
-const supabase = createClient(
-  import.meta.env.VITE_API_URL,
-  import.meta.env.VITE_API_KEY
-);
+import ClientForm from "./components/ClientForm"; // Componente separado para el formulario del cliente
+import ClientsTable from "./components/ClientsTable"; // Componente separado para la tabla de clientes
+import { supabase } from "./supabase"; // Importa la instancia de Supabase para interactuar con la base de datos
+import { useState, useEffect } from "react"; // Importa hooks necesarios de React
 
 const App = () => {
-  // estados
-  const [clients, setClients] = useState([]);
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [age, setAge] = useState("");
+  // Estado para manejar los valores de los inputs
+  const [age, setAge] = useState(""); // Edad del cliente actual
+  const [client, setClient] = useState(null); // Cliente seleccionado para edición
+  const [clients, setClients] = useState([]); // Lista de todos los clientes obtenidos de la base de datos
+  const [firstName, setFirstName] = useState(""); // Nombre del cliente actual
+  const [lastName, setLastName] = useState(""); // Apellido del cliente actual
 
-  // funciones para manejar el cambio de los inputs
-  const handleInputChange = (event) => setFirstName(event.target.value);
+  // Maneja cambios en el input del nombre
+  const handleFirstNameChange = (event) => setFirstName(event.target.value);
+
+  // Maneja cambios en el input del apellido
   const handleLastNameChange = (event) => setLastName(event.target.value);
+
+  // Maneja cambios en el input de la edad
   const handleAgeChange = (event) => setAge(event.target.value);
 
-  // función para manejar el evento cuando se le da clic al botón de guardar
+  // Maneja el envío del formulario para agregar o actualizar un cliente
   const handleSubmit = async () => {
-    // espera a guardar el cliente
-    await addClient();
-    // vuelve a llamar el listado de clientes para actualizar la información
+    if (client) {
+      // Si hay un cliente seleccionado, actualiza el cliente
+      await updateClient(client);
+    } else {
+      // Si no hay cliente seleccionado, agrega un nuevo cliente
+      await addClient();
+    }
+
+    // Después de agregar o actualizar, recarga la lista de clientes
     await getClients();
 
-    // resetea todos los inputs
-    setFirstName("");
-    setLastName("");
-    setAge("");
+    // Resetea los inputs del formulario
+    resetInputs();
+
+    // Limpia el cliente seleccionado
+    setClient(null);
   };
 
-  // función para traer el listado de clientes
+  // Obtiene todos los clientes de la base de datos
   const getClients = async () => {
-    // espera a traer el listado de clientes, en una variable data
-    const { data } = await supabase
-      .from("clients")
-      .select("*")
-      .order("id", { ascending: true });
+    const { data } = await supabase.from("clients").select("*");
 
-    // se actualiza el estado para contener la data
+    // Actualiza el estado con los clientes obtenidos
     setClients(data);
   };
 
-  // función para añadir un nuevo cliente
+  // Agrega un nuevo cliente a la base de datos
   const addClient = async () => {
-    // espera a agregar la información que tenemos guardad en el estado en la BD
     await supabase
       .from("clients")
       .insert({ first_name: firstName, last_name: lastName, age });
   };
 
-  // función que borra un cliente por id
+  // Elimina un cliente de la base de datos basado en su id
   const deleteClientById = async (id) => {
-    // espera a borrar el cliente que tenga el id que le pasamos como parámetro
     await supabase.from("clients").delete().eq("id", id);
-    // vuelve a consultar el listado de clientes para actualizar el cambio
+
+    // Vuelve a cargar la lista de clientes después de borrar uno
     await getClients();
   };
 
-  // efecto que se ejecuta la primera vez que se monta el componente
+  // Actualiza un cliente existente en la base de datos
+  const updateClient = async (client) => {
+    await supabase
+      .from("clients")
+      .update({ first_name: firstName, last_name: lastName, age })
+      .eq("id", client.id);
+  };
+
+  // Resetea los campos del formulario
+  const resetInputs = () => {
+    setFirstName("");
+    setLastName("");
+    setAge("");
+  };
+
+  // Hook useEffect para cargar la lista de clientes cuando el componente se monta
   useEffect(() => {
-    // trae el listado de clientes
-    getClients();
-  }, []);
+    getClients(); // Obtiene los clientes cuando el componente se monta por primera vez
+  }, []); // El array vacío significa que solo se ejecuta una vez
+
+  // Hook useEffect para cargar los datos de un cliente seleccionado en el formulario
+  useEffect(() => {
+    if (!client) return resetInputs(); // Si no hay cliente seleccionado, resetea los campos
+    // Si hay un cliente, rellena los campos del formulario con sus datos
+    setFirstName(client.first_name);
+    setLastName(client.last_name);
+    setAge(client.age);
+  }, [client]); // Se ejecuta cada vez que 'client' cambia
 
   return (
     <div className="container">
-      <div
-        className="col-md-6 offset-md-3 mt-3 d-flex flex-column"
-        style={{ gap: "10px" }}
-      >
-        <div className="d-flex" style={{ gap: "10px" }}>
-          <input
-            className="form-control"
-            placeholder="Nombres"
-            type="text"
-            value={firstName}
-            onChange={handleInputChange}
-          />
-          <input
-            className="form-control"
-            type="text"
-            placeholder="Apellidos"
-            value={lastName}
-            onChange={handleLastNameChange}
-          />
-        </div>
-        <input
-          className="form-control"
-          type="number"
-          placeholder="Edad"
-          value={age}
-          onChange={handleAgeChange}
-        />
-        <button className="btn btn-primary" onClick={handleSubmit}>
-          Guardar
-        </button>
-      </div>
+      {/* Componente que renderiza el formulario del cliente */}
+      <ClientForm
+        age={age}
+        client={client}
+        firstName={firstName}
+        lastName={lastName}
+        handleAgeChange={handleAgeChange}
+        handleFirstNameChange={handleFirstNameChange}
+        handleLastNameChange={handleLastNameChange}
+        handleSubmit={handleSubmit}
+        setClient={setClient} // Pasa la función para limpiar el cliente seleccionado
+      />
+
+      {/* Sección para mostrar la tabla de clientes */}
       <div className="table-responsive mt-3">
-        <table className="table">
-          <thead>
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Nombres</th>
-              <th scope="col">Apellidos</th>
-              <th scope="col">Edad</th>
-              <th scope="col">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {clients.map((client) => (
-              <tr key={client.id}>
-                <th scope="row">{client.id}</th>
-                <td>{client.first_name}</td>
-                <td>{client.last_name}</td>
-                <td>{client.age}</td>
-                <td className="d-flex" style={{ gap: "10px" }}>
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => deleteClientById(client.id)}
-                  >
-                    Borrar
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        {/* Componente que renderiza la tabla de clientes */}
+        <ClientsTable
+          clients={clients} // Pasa la lista de clientes
+          deleteClientById={deleteClientById} // Pasa la función para eliminar un cliente
+          setClient={setClient} // Pasa la función para seleccionar un cliente para edición
+        />
       </div>
     </div>
   );
