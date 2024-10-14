@@ -1,51 +1,80 @@
-# Pasos para ejecutar este proyecto
+# React + Supabase Project
 
-1. Clonar o descargar este repositorio 
-    `git clone https://github.com/jisazamp/react-supabase.git`
-2. Instalar las dependencias:
-  `npm install`
-3. Cambiar el nombre del archivo `.env.example` por `.env.local`
+Este proyecto es una aplicación de gestión de clientes usando React y Supabase.
 
-## Creación de proyecto en Supabase
+## Requisitos previos
 
-1. Crear una cuenta en Supabase https://supabase.com/
-2. Crear una organización
+- Node.js instalado (https://nodejs.org/)
+- Cuenta en Supabase (https://supabase.com/)
 
-<img width="733" alt="image" src="https://github.com/user-attachments/assets/0e66ec47-e7d9-4870-9647-1f0a942a9a69">
+## Pasos para ejecutar este proyecto
 
-3. Crear un nuevo proyecto
+### 1. Clonar o descargar este repositorio
 
-<img width="721" alt="image" src="https://github.com/user-attachments/assets/31325235-48f9-41be-9d34-8770cb86a7e5">
+```bash
+git clone https://github.com/jisazamp/react-supabase.git
+```
 
-4. Esperar unos minutos a que termine la creación del proyecto en Supabase. Después de estos minutos, deberíamos poder ver la URL del proyecto y el API Key
+### 2. Instalar las dependencias
 
-<img width="834" alt="image" src="https://github.com/user-attachments/assets/cb2b1b58-a18b-4c6b-a4fe-91b2c41001aa">
+```bash
+npm install
+```
 
-5. Dentro de nuestro proyecto, a través del menú lateral, accede a la opción de Database.
+### 3. Configurar variables de entorno
 
-<img width="1440" alt="image" src="https://github.com/user-attachments/assets/1782a40b-5595-4422-8226-da152cd574c9">
+- Renombrar el archivo `.env.example` a `.env.local`.
+- Editar el archivo `.env.local` y reemplazar los valores de `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` con los datos de tu proyecto Supabase (ver más abajo cómo obtener estos valores).
 
-6. Crea una nueva tabla, "clients". Para efectos de este ejercicio, vas a deshabilitar el check de "Enable Row Level Security (RLS)
+### 4. Crear un proyecto en Supabase
 
-<img width="672" alt="image" src="https://github.com/user-attachments/assets/c1036552-4cc8-465c-ab7d-7ce15e0f26fe">
+#### 4.1 Crear una cuenta y un proyecto en Supabase
 
-Esta tabla va a tener los siguientes campos:
-- id
-- created_at
-- first_name
-- last_name
-- age
+1. Crear una cuenta en [Supabase](https://supabase.com/).
+2. Crear una nueva organización y luego un nuevo proyecto.  
+   ![Crear Proyecto](https://github.com/user-attachments/assets/31325235-48f9-41be-9d34-8770cb86a7e5)
+3. Espera unos minutos para que el proyecto sea creado. Una vez listo, obtendrás la URL del proyecto y la API Key (anon key), que necesitarás para configurar el archivo `.env.local`.
 
-<img width="673" alt="image" src="https://github.com/user-attachments/assets/c478b82f-e70f-4ae1-b126-58ab28275e6a">
+#### 4.2 Crear la tabla "clients"
 
+1. En el panel de Supabase, ir a la sección de **Database**.
+2. Crear una nueva tabla llamada `clients`.
+   ![Crear tabla](https://github.com/user-attachments/assets/c1036552-4cc8-465c-ab7d-7ce15e0f26fe)
+3. Desactivar **Enable Row Level Security (RLS)** para fines de este ejercicio.
+4. La tabla deberá tener las siguientes columnas:
 
+| Columna      | Tipo     |
+|--------------|----------|
+| `id`         | `bigint` (Primary Key) |
+| `created_at` | `timestamp` |
+| `first_name` | `text`    |
+| `last_name`  | `text`    |
+| `age`        | `integer` |
 
+   ![Estructura de tabla](https://github.com/user-attachments/assets/c478b82f-e70f-4ae1-b126-58ab28275e6a)
 
-## Editar el archivo .env.local
+#### 4.3 Obtener la URL y la API Key
 
-1. Reemplazar los valores de este archivo para que correspondan a la URL y al API key de nuestro proyecto
-<img width="525" alt="image" src="https://github.com/user-attachments/assets/19ae8ecf-e0b5-4fc2-aa35-4b619c32c02d">
+1. En el dashboard de Supabase, ve a **Settings** > **API** para encontrar la URL del proyecto y la clave anónima (API Key).  
+   ![API Key](https://github.com/user-attachments/assets/cb2b1b58-a18b-4c6b-a4fe-91b2c41001aa)
 
-## Ejecutar el proyecto
-`npm run dev`
+### 5. Configurar el archivo `.env.local`
 
+1. Abre el archivo `.env.local` y reemplaza los valores de las siguientes variables:
+
+```env
+VITE_API_URL=tu-url-de-supabase
+VITE_API_KEY=tu-api-key
+```
+
+### 6. Ejecutar el proyecto
+
+Una vez configurado todo, ejecuta el siguiente comando para iniciar el servidor de desarrollo:
+
+```bash
+npm run dev
+```
+
+### 7. Acceder a la aplicación
+
+Abre tu navegador y ve a `http://localhost:5173` para interactuar con la aplicación.
